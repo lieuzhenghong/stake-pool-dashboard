@@ -77,7 +77,7 @@ function populateValidatorTables(
             epoch: epoch,
             timestamp: new Date().toLocaleString(),
             commission: account.commission,
-            credits: account.epochCredits.filter(x => x[0] == epoch)[1],
+            credits: account.epochCredits.filter(x => x[0] == epoch)[0][1],
             lastVote: account.lastVote,
         }
     })
@@ -109,6 +109,7 @@ async function main() {
     const accounts = await getValidatorAccounts(connection, STAKE_PROGRAM_ADDR);
     const activeAccounts = accounts.current;
     const currentEpoch = (await connection.getEpochInfo("confirmed")).epoch;
+    console.log(currentEpoch)
     populateValidatorTables(activeAccounts, currentEpoch, db)
     const stmt = db.prepare('SELECT * from validatorlogs').all();
     console.log(stmt);
