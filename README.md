@@ -2,22 +2,81 @@
 
 Code to build a real-time dashboard for stake pools
 
+## Introduction
+
+The idea is to make real-time RPC calls to inspect the state
+of the stake pools and validators, 
+and log this state as it changes in real time.
+
+A validator is something that validates the blockchain.
+It can receive stake delegated to it,
+and earns rewards that are given to the owners of the stake
+that are delegated to it.
+
+A stake pool is a pool of stake. Each stake pool delegates
+stake to many different validators. 
+There is a one-to-many relationship between a stake pool
+and a validator. 
+`StakePoolValidators = Array<[Validator, number]>` where
+`number` is the amount of stake delegated to that validator.
+
 ## Architecture
 
-Validators Table
+### ValidatorHistory Table
 
-- Each validator pubkey + epoch is a composite primary key
-(maybe timestamp? since we don't know slot)
-- Each validator epoch contains:
+A validator history entry is a snapshot of the validator's state
+at some point in time. This is used to calculate the performance
+of the validator.
+
+- Validator pubkey as foreign key (? <-- does this work)
+- Epoch + Timestamp is the composite primary key
+- Each validator-epoch-timestamp contains:
+    - vote pubkey
+    - epoch
+    - timestamp
+    - activatedStake
+    - commission
+    - epochVoteAccount
     - epochCredits
+    - lastVote
 
-Stake Pool Table
+### StakePool Table
+
+A stake pool
+
+A stake pool can change its validator set only every epoch
+(not in real time). Hence we do not need to have StakePool
+and StakePoolHistory. (is this good practice?)
 
 - Each Stake Pool + Epoch is a composite primary key
 - Each stake pool epoch contains:
-    - 
+    - stakerPubKey
+    - epoch
+    - managerPubkey
+    - depositAuthority
+    - poolMint
+    - totalStakeLamports // only updated every epoch
+    - poolTokenSupply
+    - validators: `Array<[Validator, number]>`
 
-Combined Table?
+### ValidatorPerformance Table 
+
+"Composite" table computed from historical validator performance
+
+Main thing is: at every epoch, how much did they start with, how much did they end with
+Things like uptime, APY, etc etc should all be calculated.
+This can be calculated from the ValidatorLog history 
+
+So i'm thinking of running a cronjob and filling up the table
+
+
+### PoolPerformance Table
+
+- "Composite" table that is computed from the validators
+
+For each valdiator, we calculate its performance, and from there we
+can calculate the pool's performance.
+
 
 ## Obsolete stuff
 
