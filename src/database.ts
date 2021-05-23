@@ -65,9 +65,9 @@ export function createValidatorTable(
         epochVoteAccount BOOLEAN,
         PRIMARY KEY (votePubkey, epoch)
     );`)
-    db.transaction(() => {
-        createValidatorTableCommand.run();
-    })
+    db.transaction(() =>
+        createValidatorTableCommand.run()
+    )()
     console.log("Ran command!")
 }
 
@@ -84,7 +84,8 @@ export function createValidatorLogTable(
         lastVote INTEGER,
         PRIMARY KEY (votePubkey, epoch, timestamp)
     );`)
-    db.transaction(() => { command.run() })
+    // db.transaction(() => { command.run() })
+    command.run();
     console.log("Created validatorlogs table!")
 }
 

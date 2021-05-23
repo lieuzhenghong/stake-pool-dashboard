@@ -65,12 +65,12 @@ function populateValidatorTables(
             @commission,
             @credits,
             @lastVote
-            );`
+            )`
     );
 
-    const items = accountsInfo.filter((account) => {
+    const items = accountsInfo.filter((account) =>
         account.epochCredits.map((a) => a[0]).includes(epoch)
-    }).map((account) => {
+    ).map((account) => {
         console.log(account);
         return {
             votePubkey: account.votePubkey,
@@ -81,6 +81,8 @@ function populateValidatorTables(
             lastVote: account.lastVote,
         }
     })
+
+    console.log(items)
 
     const insertMany = db.transaction((logs) => {
         for (const validatorLog of logs) insert.run(validatorLog);
@@ -99,20 +101,20 @@ const STAKE_PROGRAM_ADDR = new solanaWeb3.PublicKey(
     'Stake11111111111111111111111111111111111111',
 );
 
-const db = database.openDb();
-const validatorTable = database.createValidatorTable(db);
-const validatorLogTable = database.createValidatorLogTable(db);
-main()
 
 async function main() {
+    const db = database.openDb();
+    const validatorTable = database.createValidatorTable(db);
+    const validatorLogTable = database.createValidatorLogTable(db);
     const accounts = await getValidatorAccounts(connection, STAKE_PROGRAM_ADDR);
     const activeAccounts = accounts.current;
     const currentEpoch = (await connection.getEpochInfo("confirmed")).epoch;
     populateValidatorTables(activeAccounts, currentEpoch, db)
-    const stmt = db.prepare('SELECT * from validatorlogs')
-    const logs = stmt.all();
-    console.log(logs);
+    const stmt = db.prepare('SELECT * from validatorlogs').all();
+    console.log(stmt);
 }
+
+main()
 
 
 /**
