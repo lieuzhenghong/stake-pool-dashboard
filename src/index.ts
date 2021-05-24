@@ -47,9 +47,50 @@ async function getValidatorAccounts(
         */
 }
 
+function populateValidatorTable(
+    accountsInfo: Array<solanaWeb3.VoteAccountInfo>,
+    currentEpoch: number,
+    db: Database
+) {
+
+    // INSERT IGNORE inserts if not exist
+    const insert = db.prepare(
+        `INSERT OR IGNORE INTO validators VALUES (
+            @votePubkey,
+            @epoch,
+            @activatedStake,
+            @credits,
+            @epochVoteAccount
+        )`
+    )
+
+    const items = accountsInfo.filter((account) =>
+        account.epochCredits.map((a) => a[0]).includes(currentEpoch)
+    ).map((account) => {
+        console.log(account);
+        return {
+            votePubkey: account.votePubkey,
+            epoch: currentEpoch,
+            activatedStake: account.activatedStake,
+            credits: account.epochCredits.filter(x => x[0] == currentEpoch)[0][1],
+            epochVoteAccount: account.epochVoteAccount ? 1 : 0
+        }
+    })
+
+    console.log(items)
+
+    const insertMany = db.transaction((logs) => {
+        for (const validatorLog of logs) insert.run(validatorLog);
+    })
+
+    console.log(items)
+    insertMany(items);
+
+}
+
 function populateValidatorTables(
     accountsInfo: Array<solanaWeb3.VoteAccountInfo>,
-    epoch: number,
+    // epoch: number,
     db: Database
 ) {
     /* Populate validator and validatorlog tables */
@@ -68,19 +109,18 @@ function populateValidatorTables(
             )`
     );
 
-    const items = accountsInfo.filter((account) =>
-        account.epochCredits.map((a) => a[0]).includes(epoch)
-    ).map((account) => {
-        console.log(account);
-        return {
-            votePubkey: account.votePubkey,
-            epoch: epoch,
-            timestamp: new Date().toLocaleString(),
-            commission: account.commission,
-            credits: account.epochCredits.filter(x => x[0] == epoch)[0][1],
-            lastVote: account.lastVote,
-        }
-    })
+    const items = accountsInfo.map((account) => {
+        return account.epochCredits.map((epochCredit) => {
+            return {
+                votePubkey: account.votePubkey,
+                epoch: epochCredit[0],
+                timestamp: new Date().toLocaleString(),
+                commission: account.commission,
+                credits: epochCredit[1],
+                lastVote: account.lastVote,
+            }
+        })
+    }).reduce((acc, val) => acc.concat(val), [])
 
     console.log(items)
 
@@ -110,8 +150,10 @@ async function main() {
     const activeAccounts = accounts.current;
     const currentEpoch = (await connection.getEpochInfo("confirmed")).epoch;
     console.log(currentEpoch)
-    populateValidatorTables(activeAccounts, currentEpoch, db)
-    const stmt = db.prepare('SELECT * from validatorlogs').all();
+    populateValidatorTable(activeAccounts, currentEpoch, db)
+    populateValidatorTables(activeAccounts, db)
+    // const stmt = db.prepare('SELECT * from validatorlogs').all();
+    const stmt = db.prepare('SELECT * from validators').all();
     console.log(stmt);
 }
 
