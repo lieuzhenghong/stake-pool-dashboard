@@ -32,25 +32,8 @@ We also need a table to convert epoch credits to points
 
 getEpochInfo
 https://solana-labs.github.io/solana-web3.js/modules.html#epochinfo
-
-Epoch
 */
 
-/*
-export function createTable(
-    tableName: string,
-    db: Database,
-    schema: Map) {
-    const createTableCommand = db.prepare(`CREATE TABLE IF NOT EXISTS ${tableName} (
-
-
-    )`)
-    console.log(createTableCommand)
-    db.transaction(() => {
-        createTableCommand.run();
-    })
-}
-*/
 
 export function createValidatorTable(
     db: Database
@@ -81,7 +64,7 @@ export function createValidatorLogTable(
         timestamp TIMESTAMP,
         commission INTEGER,
         credits INTEGER,
-        lastVote INTEGER,
+        lastVoteSlot INTEGER,
         PRIMARY KEY (votePubkey, epoch, timestamp)
     );`)
     // db.transaction(() => { command.run() })
