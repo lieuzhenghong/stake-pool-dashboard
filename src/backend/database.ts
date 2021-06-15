@@ -75,13 +75,16 @@ export function createPoolTable(db: Database, tableName: string = 'pools') {
   console.log('Run command!');
   const createValidatorTableCommand = db.prepare(
     `CREATE TABLE IF NOT EXISTS ${tableName} (
-        stakerPubkey STRING,
+        pubkey STRING,
         epoch INTEGER, 
         managerPubkey STRING,
-        depositAuthority,
-        totalStakeLamports,
-        poolTokenSupply,
-        PRIMARY KEY (stakerPubkey, epoch)
+        stakerPubkey STRING,
+        depositAuthority STRING,
+        totalStakeLamports INTEGER,
+        poolTokenSupply INTEGER,
+        feeDenominator INTEGER,
+        feeNumerator INTEGER,
+        PRIMARY KEY (pubkey, epoch)
     );`,
   );
   db.transaction(() => {
@@ -95,11 +98,11 @@ export function createPoolValidatorTable(
   tableName: string = 'pool_validator',
 ) {
   const command = db.prepare(`CREATE TABLE IF NOT EXISTS ${tableName} (
-        stakerPubkey STRING,
+        pubkey STRING,
         epoch INTEGER, 
-        validatorPubkey STRING,
-        stakeInValidator INTEGER,
-        PRIMARY KEY (stakerPubkey, epoch, validatorPubkey)
+        voteAccountAddress STRING,
+        stakeLamports INTEGER,
+        PRIMARY KEY (pubkey, epoch, voteAccountAddress)
     )`);
   db.transaction(() => command.run());
 }
