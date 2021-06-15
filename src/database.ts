@@ -36,11 +36,12 @@ https://solana-labs.github.io/solana-web3.js/modules.html#epochinfo
 
 
 export function createValidatorTable(
-    db: Database
+    db: Database,
+    tableName: string = 'validators',
 ) {
     console.log("Run command!")
     const createValidatorTableCommand = db.prepare(
-        `CREATE TABLE IF NOT EXISTS validators (
+        `CREATE TABLE IF NOT EXISTS ${tableName} (
         votePubkey STRING,
         epoch INTEGER, 
         activatedStake INTEGER,
@@ -55,10 +56,11 @@ export function createValidatorTable(
 }
 
 export function createValidatorLogTable(
-    db: Database
+    db: Database,
+    tableName: string = 'validatorlogs',
 ) {
     const command = db.prepare(
-        `CREATE TABLE IF NOT EXISTS validatorlogs (
+        `CREATE TABLE IF NOT EXISTS ${tableName} (
         votePubkey STRING,
         epoch INTEGER, 
         timestamp TIMESTAMP,

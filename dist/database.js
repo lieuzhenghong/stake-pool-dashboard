@@ -27,27 +27,10 @@ We also need a table to convert epoch credits to points
 
 getEpochInfo
 https://solana-labs.github.io/solana-web3.js/modules.html#epochinfo
-
-Epoch
 */
-/*
-export function createTable(
-    tableName: string,
-    db: Database,
-    schema: Map) {
-    const createTableCommand = db.prepare(`CREATE TABLE IF NOT EXISTS ${tableName} (
-
-
-    )`)
-    console.log(createTableCommand)
-    db.transaction(() => {
-        createTableCommand.run();
-    })
-}
-*/
-export function createValidatorTable(db) {
+export function createValidatorTable(db, tableName = 'validators') {
     console.log("Run command!");
-    const createValidatorTableCommand = db.prepare(`CREATE TABLE IF NOT EXISTS validators (
+    const createValidatorTableCommand = db.prepare(`CREATE TABLE IF NOT EXISTS ${tableName} (
         votePubkey STRING,
         epoch INTEGER, 
         activatedStake INTEGER,
@@ -58,14 +41,14 @@ export function createValidatorTable(db) {
     db.transaction(() => createValidatorTableCommand.run())();
     console.log("Ran command!");
 }
-export function createValidatorLogTable(db) {
-    const command = db.prepare(`CREATE TABLE IF NOT EXISTS validatorlogs (
+export function createValidatorLogTable(db, tableName = 'validatorlogs') {
+    const command = db.prepare(`CREATE TABLE IF NOT EXISTS ${tableName} (
         votePubkey STRING,
         epoch INTEGER, 
         timestamp TIMESTAMP,
         commission INTEGER,
         credits INTEGER,
-        lastVote INTEGER,
+        lastVoteSlot INTEGER,
         PRIMARY KEY (votePubkey, epoch, timestamp)
     );`);
     // db.transaction(() => { command.run() })

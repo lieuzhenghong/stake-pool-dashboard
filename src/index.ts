@@ -16,12 +16,13 @@ async function getValidatorAccounts(
 function populateValidatorsTable(
     accountsInfo: Array<solanaWeb3.VoteAccountInfo>,
     currentEpoch: number,
-    db: Database
+    db: Database,
+    tableName: string = 'validators'
 ) {
 
     // INSERT IGNORE inserts if not exist
     const insert = db.prepare(
-        `INSERT OR IGNORE INTO validators VALUES (
+        `INSERT OR IGNORE INTO ${tableName} VALUES (
             @votePubkey,
             @epoch,
             @activatedStake,
@@ -57,7 +58,8 @@ function populateValidatorsTable(
 function populateValidatorLogsTable(
     accountsInfo: Array<solanaWeb3.VoteAccountInfo>,
     currentEpoch: number,
-    db: Database
+    db: Database,
+    tableName: string = 'validatorlogs',
 ) {
     /* Populate validator logs table */
 
@@ -65,7 +67,7 @@ function populateValidatorLogsTable(
        override the existing epochCredits
      */
     const insert = db.prepare(
-        `INSERT INTO validatorlogs VALUES (
+        `INSERT INTO ${tableName} VALUES (
             @votePubkey,
             @epoch,
             @timestamp,
@@ -96,8 +98,13 @@ function populateValidatorLogsTable(
     insertMany(items);
 }
 
-const connection = new solanaWeb3.Connection(
+const connectionMainnet = new solanaWeb3.Connection(
     'https://api.mainnet-beta.solana.com/',
+    'confirmed',
+);
+
+const connectionTestnet = new solanaWeb3.Connection(
+    'https://api.testnet.solana.com/',
     'confirmed',
 );
 
@@ -111,6 +118,9 @@ async function main() {
     const validatorTable = database.createValidatorTable(db);
     const validatorLogTable = database.createValidatorLogTable(db);
 
+    const validatorTableTestnet = database.createValidatorTable(db, 'validatorsTestnet');
+    const validatorLogTableTestnet = database.createValidatorLogTable(db, 'validatorlogsTestnet');
+
     await updateData();
     const stmt = db.prepare('SELECT * from validators').all();
     console.log(stmt);
@@ -118,12 +128,22 @@ async function main() {
 
 async function updateData() {
     const db = database.openDb();
-    const accounts = await getValidatorAccounts(connection, STAKE_PROGRAM_ADDR);
+
+    // Update Mainnet
+    const accounts = await getValidatorAccounts(connectionMainnet, STAKE_PROGRAM_ADDR);
     const activeAccounts = accounts.current;
-    const currentEpoch = (await connection.getEpochInfo("confirmed")).epoch;
+    const currentEpoch = (await connectionMainnet.getEpochInfo("confirmed")).epoch;
     console.log(currentEpoch)
     populateValidatorsTable(activeAccounts, currentEpoch, db)
     populateValidatorLogsTable(activeAccounts, currentEpoch, db)
+
+    // Update Testnet
+    const accountsTestnet = await getValidatorAccounts(connectionTestnet, STAKE_PROGRAM_ADDR);
+    const activeAccountsTestnet = accountsTestnet.current;
+    const currentEpochTestnet = (await connectionTestnet.getEpochInfo("confirmed")).epoch;
+    console.log(currentEpochTestnet)
+    populateValidatorsTable(activeAccountsTestnet, currentEpochTestnet, db, 'validatorsTestnet')
+    populateValidatorLogsTable(activeAccountsTestnet, currentEpochTestnet, db, 'validatorlogsTestnet')
 }
 
 setInterval(updateData, 300000)
