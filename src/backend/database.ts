@@ -71,10 +71,10 @@ export function createValidatorLogTable(
   console.log('Created validatorlogs table!');
 }
 
-export function createPoolTable(db: Database) {
+export function createPoolTable(db: Database, tableName: string = 'pools') {
   console.log('Run command!');
   const createValidatorTableCommand = db.prepare(
-    `CREATE TABLE IF NOT EXISTS pools (
+    `CREATE TABLE IF NOT EXISTS ${tableName} (
         stakerPubkey STRING,
         epoch INTEGER, 
         managerPubkey STRING,
@@ -90,8 +90,11 @@ export function createPoolTable(db: Database) {
   console.log('Ran command!');
 }
 
-export function createPoolValidatorTable(db: Database) {
-  const command = db.prepare(`CREATE TABLE IF NOT EXISTS pool_validator (
+export function createPoolValidatorTable(
+  db: Database,
+  tableName: string = 'pool_validator',
+) {
+  const command = db.prepare(`CREATE TABLE IF NOT EXISTS ${tableName} (
         stakerPubkey STRING,
         epoch INTEGER, 
         validatorPubkey STRING,

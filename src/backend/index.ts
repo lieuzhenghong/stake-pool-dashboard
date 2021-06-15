@@ -63,8 +63,8 @@ function populateValidatorLogsTable(
   /* Populate validator logs table */
 
   /* For each entry in epochCredits,
-       override the existing epochCredits
-     */
+  override the existing epochCredits
+  */
   const insert = db.prepare(
     `INSERT INTO ${tableName} VALUES (
             @votePubkey,
@@ -126,9 +126,11 @@ async function main() {
     'validatorlogsTestnet',
   );
 
-  await updateData();
-  const stmt = db.prepare('SELECT * from validators').all();
-  console.log(stmt);
+  const poolTableTestnet = database.createPoolTable(db, 'poolsTestnet');
+  const poolValidatorTableTestnet = database.createPoolValidatorTable(
+    db,
+    'pool_validatorTestnet',
+  );
 }
 
 async function updateData() {
@@ -170,4 +172,5 @@ async function updateData() {
   );
 }
 
-setInterval(updateData, 300000);
+// setInterval(updateData, 300000);
+main();
