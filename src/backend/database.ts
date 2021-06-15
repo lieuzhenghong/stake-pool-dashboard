@@ -2,15 +2,13 @@
  * Set up SQLite database
  */
 
-import Database from 'better-sqlite3'
+import Database from 'better-sqlite3';
 
 export function openDb(dbName = 'database.db') {
-    return new Database(dbName, { verbose: console.log })
+  return new Database(dbName, { verbose: console.log });
 }
 
-export function createSchema() {
-
-}
+export function createSchema() {}
 
 /*
 
@@ -34,33 +32,31 @@ getEpochInfo
 https://solana-labs.github.io/solana-web3.js/modules.html#epochinfo
 */
 
-
 export function createValidatorTable(
-    db: Database,
-    tableName: string = 'validators',
+  db: Database,
+  tableName: string = 'validators',
 ) {
-    console.log("Run command!")
-    const createValidatorTableCommand = db.prepare(
-        `CREATE TABLE IF NOT EXISTS ${tableName} (
+  console.log('Run command!');
+  const createValidatorTableCommand = db.prepare(
+    `CREATE TABLE IF NOT EXISTS ${tableName} (
         votePubkey STRING,
         epoch INTEGER, 
         activatedStake INTEGER,
         credits INTEGER,
         epochVoteAccount BOOLEAN,
         PRIMARY KEY (votePubkey, epoch)
-    );`)
-    db.transaction(() =>
-        createValidatorTableCommand.run()
-    )()
-    console.log("Ran command!")
+    );`,
+  );
+  db.transaction(() => createValidatorTableCommand.run())();
+  console.log('Ran command!');
 }
 
 export function createValidatorLogTable(
-    db: Database,
-    tableName: string = 'validatorlogs',
+  db: Database,
+  tableName: string = 'validatorlogs',
 ) {
-    const command = db.prepare(
-        `CREATE TABLE IF NOT EXISTS ${tableName} (
+  const command = db.prepare(
+    `CREATE TABLE IF NOT EXISTS ${tableName} (
         votePubkey STRING,
         epoch INTEGER, 
         timestamp TIMESTAMP,
@@ -68,18 +64,17 @@ export function createValidatorLogTable(
         credits INTEGER,
         lastVoteSlot INTEGER,
         PRIMARY KEY (votePubkey, epoch, timestamp)
-    );`)
-    // db.transaction(() => { command.run() })
-    command.run();
-    console.log("Created validatorlogs table!")
+    );`,
+  );
+  // db.transaction(() => { command.run() })
+  command.run();
+  console.log('Created validatorlogs table!');
 }
 
-export function createPoolTable(
-    db: Database
-) {
-    console.log("Run command!")
-    const createValidatorTableCommand = db.prepare(
-        `CREATE TABLE IF NOT EXISTS pools (
+export function createPoolTable(db: Database) {
+  console.log('Run command!');
+  const createValidatorTableCommand = db.prepare(
+    `CREATE TABLE IF NOT EXISTS pools (
         stakerPubkey STRING,
         epoch INTEGER, 
         managerPubkey STRING,
@@ -87,24 +82,21 @@ export function createPoolTable(
         totalStakeLamports,
         poolTokenSupply,
         PRIMARY KEY (stakerPubkey, epoch)
-    );`)
-    db.transaction(() => {
-        createValidatorTableCommand.run();
-    })
-    console.log("Ran command!")
+    );`,
+  );
+  db.transaction(() => {
+    createValidatorTableCommand.run();
+  });
+  console.log('Ran command!');
 }
 
-
-export function createPoolValidatorTable(
-    db: Database
-
-) {
-    const command = db.prepare(`CREATE TABLE IF NOT EXISTS pool_validator (
+export function createPoolValidatorTable(db: Database) {
+  const command = db.prepare(`CREATE TABLE IF NOT EXISTS pool_validator (
         stakerPubkey STRING,
         epoch INTEGER, 
         validatorPubkey STRING,
         stakeInValidator INTEGER,
         PRIMARY KEY (stakerPubkey, epoch, validatorPubkey)
-    )`)
-    db.transaction(() => command.run())
+    )`);
+  db.transaction(() => command.run());
 }
