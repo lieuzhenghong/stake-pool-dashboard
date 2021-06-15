@@ -104,6 +104,4 @@ function updateData() {
         populateValidatorLogsTable(activeAccountsTestnet, currentEpochTestnet, db, 'validatorlogsTestnet');
     });
 }
-// setInterval(updateData, 300000)
-updateData();
-// main()
+setInterval(updateData, 300000);
