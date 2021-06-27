@@ -4,10 +4,7 @@
     "compile": "tsc"
   },
   "dependencies": {
-    "@mikro-orm/core": "^4.5.5",
-    "@mikro-orm/reflection": "^4.5.5",
-    "@mikro-orm/sqlite": "^4.5.5",
-    "@solana/web3.js": "^1.10.1",
+    "@solana/web3.js": "^1.19.0",
     "better-sqlite3": "^7.3.1"
   },
   "type": "module",
